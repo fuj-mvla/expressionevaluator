@@ -10,7 +10,7 @@ public class ExpressionEvaluator {
 	// The placeholders for the two stacks
 	private GenericStack<Double> dataStack;
 	private GenericStack<String>  operStack;
-	
+	private GenericStack k;
 	/**
 	 * Convert to tokens. Takes a string and splits it into tokens that
 	 * are either operators or data. This is where you should convert 
@@ -22,7 +22,15 @@ public class ExpressionEvaluator {
 	 * @return the string[]
 	 */
 	private String[] convertToTokens(String str) {
+		str = padString(str);
+		String[] split = str.split("\\s+");
 		return null;
+	}
+	
+	private String padString(String in) {
+		in = in.replaceAll("([\\+\\-\\/(\\)\\*])"," $1 ");
+		in = in.replaceAll("^\\s+(.*)","$1");
+		return in;
 	}
 	
 	/**
@@ -45,8 +53,46 @@ public class ExpressionEvaluator {
 	protected String evaluateExpression(String str) {
         dataStack =  new GenericStack<Double>();
 		operStack =  new GenericStack<String>();
+		String original = str;
+		String[] data = convertToTokens(str);
+		int i = 0;
 		
-		return ("You need to code this!");
+		while(true) {
+			String token = data[i];
+			if (identifyTokenType(token).equals("Integer")||identifyTokenType(token).equals("Double")) {
+				dataStack.push(Double.parseDouble(token));
+			}
+			else {
+				
+			}
+			break;
+		}
+		
+		return str + "=" + dataStack.pop() + "";
 	}
+	private void EvaluateTOS() {
+		
+	}
+	
+	private boolean isHigherPrecedence() {
+		
+		return false;
+	}
+	private String identifyTokenType(String x) { 
+	            if(x.matches("^[0-9]+$")) {
+	                x = "Integer";
+	            }
+	            else if(x.matches("^[0-9]+[\\.]+[0-9]+$")) {
+	               x = "Double";
+	            }
+	            else if(x.matches("^[\\Q+-*/()\\E]+$")) {
+	                x = "Operation";
 
+	            }
+	            else {
+	                x = "Error";
+	            }
+	        
+	        return x;
+	}
 }
