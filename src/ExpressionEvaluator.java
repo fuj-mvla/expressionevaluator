@@ -27,8 +27,12 @@ public class ExpressionEvaluator {
 	private String[] convertToTokens(String str) {
 		str = padString(str);
 		String[] split = str.split("\\s+");
-		split = errorCheckParen(split);
+		split = errorCheck(split);
+	
 		return split;
+	}
+	private String[] errorCheck(String[] in ) {
+		
 	}
 	private String[] errorCheckParen(String[] in) {
 		int inc = 0;
@@ -58,6 +62,7 @@ public class ExpressionEvaluator {
 		}
 		return in;
 	}
+	
 	private String[] errorCheckOp(String[]in) {
 		String prevtok = "";
 		String currtok = "";
@@ -65,17 +70,19 @@ public class ExpressionEvaluator {
 			String[] er = {OP_ERROR};
 			return er;
 		}
-		if (!in[in.length-1].equals(")") && !identifyTokenType(in[0]).equals("Integer")&&!identifyTokenType(in[0]).equals("Double")) {
+		if (!in[in.length-1].equals(")") && !identifyTokenType(in[in.length-1]).equals("Integer")&&!identifyTokenType(in[in.length-1]).equals("Double")) {
 			String[] er = {OP_ERROR};
 			return er;
 		}
 		for (int i =0;i < in.length;i++) {
-			currtok = in[0];
-			if (identifyTokenType(currtok).equals("Operation")&&identifyTokenType(prevtok).equals("Operation")) {
-				
+			currtok = in[i];
+			if (identifyTokenType(currtok).equals("Operation")&&identifyTokenType(prevtok).equals("Operation")||identifyTokenType(currtok).equals("Parenthesis")&&identifyTokenType(prevtok).equals("Operation"))	 {
+				String[] er = {OP_ERROR};
+				return er;
 			}
-			prevtok = in[0];
+			prevtok = in[i];
 		}
+		return in;
 	}
 	private String padString(String in) {
 		in = in.replaceAll("([\\+\\-\\/(\\)\\*])"," $1 ");
@@ -205,8 +212,8 @@ public class ExpressionEvaluator {
 	            else if(x.matches("^[0-9]+[\\.]+[0-9]+$")) {
 	               x = "Double";
 	            }
-	            else if(x.matches("^[\\Q()\\E]+$")) {
-	            	
+	            else if(x.matches("^[\\Q)\\E]+$")) {
+	            	x = "Parenthesis";
 	            }
 	            else if(x.matches("^[\\Q+-*/()\\E]+$")) {
 	                x = "Operation";
@@ -218,7 +225,5 @@ public class ExpressionEvaluator {
 	        
 	        return x;
 	}
-	private boolean checkError(String er) {
-		return false;
-	}
 }
+
