@@ -6,7 +6,10 @@ public class ExpressionEvaluator {
 	private static final String OP_ERROR = "Op Error: ";
 	private static final String DATA_ERROR = "Data Error: ";
 	private static final String DIV0_ERROR = "Div0 Error: ";
-
+	private static final int prec0 = 0;
+	private static final int prec1 = 1;
+	private static final int prec2 = 2;
+	private static final int prec3 = 3;
 	// The placeholders for the two stacks
 	private GenericStack<Double> dataStack;
 	private GenericStack<String>  operStack;
@@ -24,7 +27,7 @@ public class ExpressionEvaluator {
 	private String[] convertToTokens(String str) {
 		str = padString(str);
 		String[] split = str.split("\\s+");
-		return null;
+		return split;
 	}
 	
 	private String padString(String in) {
@@ -55,29 +58,103 @@ public class ExpressionEvaluator {
 		operStack =  new GenericStack<String>();
 		String original = str;
 		String[] data = convertToTokens(str);
-		int i = 0;
-		
-		while(true) {
+		for(int i = 0;i < data.length;i++) {
 			String token = data[i];
-			if (identifyTokenType(token).equals("Integer")||identifyTokenType(token).equals("Double")) {
+			String type = identifyTokenType(token);
+			if (type.equals("Integer")||type.equals("Double")) {
 				dataStack.push(Double.parseDouble(token));
 			}
 			else {
+				if (operStack.empty() || isHigherPrecedence(token,operStack.peek())) {
+					operStack.push(token);
+				}
+				else {
+					EvaluateTOS(token);
+				}
 				
 			}
-			break;
+			
+		}
+		double val;
+		while(!operStack.empty()) {
+			
+			val= performCalc(dataStack.pop(),dataStack.pop(),operStack.pop());
+			dataStack.push(val);
 		}
 		
 		return str + "=" + dataStack.pop() + "";
 	}
-	private void EvaluateTOS() {
+	private void EvaluateTOS(String data) {
+		double val;
+		while( !isHigherPrecedence(data,operStack.peek())){
+			
+			if (!data.equals(")")) {
+				System.out.println(dataStack.toString());
+				System.out.println(operStack.toString());
+				val= performCalc(dataStack.pop(),dataStack.pop(),operStack.pop());
+				dataStack.push(val);
+			}
+			else {
+				System.out.println("here");
+				while(!operStack.peek().equals("(")) {
+					val= performCalc(dataStack.pop(),dataStack.pop(),operStack.pop());
+					dataStack.push(val);
+				}
+				operStack.pop();
+				return;
+			}
+			if (operStack.empty()) {
+				break;
+			}
+		}
+		operStack.push(data);
+	}
+	
+	private double performCalc(double d2,double d1,String op) {
+		if (op.equals("+")) {
+			return d1+d2;
+		}
+		else if(op.equals("-")) {
+			return d1-d2;
+		}
+		else if(op.equals("*")) {
+			return d1*d2;
+		}
+		else {
+			return d1/d2;
+		}
 		
 	}
 	
-	private boolean isHigherPrecedence() {
+	private boolean isHigherPrecedence(String d1, String d2) {
+		int prec = 0;
+		int precd2 = 0;
+			if (d1.equals("+")||d1.equals("-")) {
+				prec = prec1;
+			}
+			else if(d1.equals("/")||d1.equals("*")) {
+				prec = prec2;
+			}
+			else if(d1.equals("(")) {
+				return true;
+			}
+			else {
+				return false;
+			}
+			if (d2.equals("+")||d2.equals("-")) {
+				precd2 = prec1;
+			}
+			else if(d2.equals("/")||d2.equals("*")) {
+				precd2 = prec2;
+			}
+			else if(d2.equals("(")) {
+				return true;
+			}
+			return (prec>precd2);
+		}
 		
-		return false;
-	}
+	
+	
 	private String identifyTokenType(String x) { 
 	            if(x.matches("^[0-9]+$")) {
 	                x = "Integer";
