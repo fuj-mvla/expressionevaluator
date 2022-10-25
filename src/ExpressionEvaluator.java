@@ -27,9 +27,56 @@ public class ExpressionEvaluator {
 	private String[] convertToTokens(String str) {
 		str = padString(str);
 		String[] split = str.split("\\s+");
+		split = errorCheckParen(split);
 		return split;
 	}
-	
+	private String[] errorCheckParen(String[] in) {
+		int inc = 0;
+		String currtok = "";
+		String 	prevtok = "";
+		for (int i = 0;i <in.length;i++) {
+			currtok = in[i];
+			if (currtok.equals(")")& prevtok.equals("(")) {
+				String[] x = {PAREN_ERROR};
+				return x;
+			}
+			if (in[i].equals(")")) {
+				inc--;
+			}
+			else if (in[i].equals("(")) {
+				inc++;
+			}
+			if (inc<0) {
+				String[] x = {PAREN_ERROR};
+				return x;
+			}
+			prevtok = in[i];
+		}
+		if (inc!=0) {
+			String[] x = {PAREN_ERROR};
+			return x;
+		}
+		return in;
+	}
+	private String[] errorCheckOp(String[]in) {
+		String prevtok = "";
+		String currtok = "";
+		if (!in[0].equals("(")&!in[0].equals("-")&&!identifyTokenType(in[0]).equals("Integer")&&!identifyTokenType(in[0]).equals("Double")) {
+			String[] er = {OP_ERROR};
+			return er;
+		}
+		if (!in[in.length-1].equals(")") && !identifyTokenType(in[0]).equals("Integer")&&!identifyTokenType(in[0]).equals("Double")) {
+			String[] er = {OP_ERROR};
+			return er;
+		}
+		for (int i =0;i < in.length;i++) {
+			currtok = in[0];
+			if (identifyTokenType(currtok).equals("Operation")&&identifyTokenType(prevtok).equals("Operation")) {
+				
+			}
+			prevtok = in[0];
+		}
+	}
 	private String padString(String in) {
 		in = in.replaceAll("([\\+\\-\\/(\\)\\*])"," $1 ");
 		in = in.replaceAll("^\\s+(.*)","$1");
@@ -56,41 +103,37 @@ public class ExpressionEvaluator {
 	protected String evaluateExpression(String str) {
         dataStack =  new GenericStack<Double>();
 		operStack =  new GenericStack<String>();
-		String original = str;
 		String[] data = convertToTokens(str);
+		if (data.length==1) {
+			return data[0];
+		}
 		for(int i = 0;i < data.length;i++) {
 			String token = data[i];
-			String type = identifyTokenType(token);
-			if (type.equals("Integer")||type.equals("Double")) {
+			if (identifyTokenType(token).equals("Integer")||identifyTokenType(token).equals("Double")) {
 				dataStack.push(Double.parseDouble(token));
 			}
 			else {
 				if (operStack.empty() || isHigherPrecedence(token,operStack.peek())) {
 					operStack.push(token);
 				}
-				else {
+				else {;
 					EvaluateTOS(token);
 				}
-				
 			}
-			
 		}
 		double val;
 		while(!operStack.empty()) {
-			
 			val= performCalc(dataStack.pop(),dataStack.pop(),operStack.pop());
 			dataStack.push(val);
 		}
-		
 		return str + "=" + dataStack.pop() + "";
 	}
+	
 	private void EvaluateTOS(String data) {
 		double val;
 		while( !isHigherPrecedence(data,operStack.peek())){
-			
 			if (!data.equals(")")) {
 				System.out.println(dataStack.toString());
-				System.out.println(operStack.toString());
 				val= performCalc(dataStack.pop(),dataStack.pop(),operStack.pop());
 				dataStack.push(val);
 			}
@@ -162,6 +205,9 @@ public class ExpressionEvaluator {
 	            else if(x.matches("^[0-9]+[\\.]+[0-9]+$")) {
 	               x = "Double";
 	            }
+	            else if(x.matches("^[\\Q()\\E]+$")) {
+	            	
+	            }
 	            else if(x.matches("^[\\Q+-*/()\\E]+$")) {
 	                x = "Operation";
 
@@ -171,5 +217,8 @@ public class ExpressionEvaluator {
 	            }
 	        
 	        return x;
+	}
+	private boolean checkError(String er) {
+		return false;
 	}
 }
