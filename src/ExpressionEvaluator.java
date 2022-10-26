@@ -71,9 +71,7 @@ public class ExpressionEvaluator {
 				else {
 					EvaluateTOS(token);
 				}
-				
 			}
-			
 		}
 		double val;
 		while(!operStack.empty()) {
