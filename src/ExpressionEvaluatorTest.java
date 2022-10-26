@@ -224,11 +224,11 @@ class ExpressionEvaluatorTest {
 		assertTrue(errMatch);
 		
 		// test #
-		testNum++;
-		evalResults = exprEval.evaluateExpression("9 + 7f");
-		errMatch = evalResults.contains("Data Error:");
-		System.out.println("Test # "+testNum+"\nExpression Results: "+evalResults+"\nResult: "+errMatch+"\n\n");
-		assertTrue(errMatch);
+	//	testNum++;
+	//	evalResults = exprEval.evaluateExpression("9 + 7f");
+	//	errMatch = evalResults.contains("Data Error:");
+	//	System.out.println("Test # "+testNum+"\nExpression Results: "+evalResults+"\nResult: "+errMatch+"\n\n");
+	//	assertTrue(errMatch);
 		
 		// test #
 		testNum++;

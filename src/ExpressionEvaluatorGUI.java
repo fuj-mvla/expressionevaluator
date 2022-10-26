@@ -64,7 +64,7 @@ public class ExpressionEvaluatorGUI extends Application {
 	    outputResults = new Text(0,0,"");
 	    outputResults.setFont(Font.font("Cambria Math",18));
 		expression = new TextField();
-		expressionHandler();
+	//	expressionHandler();
 		expression.setOnMouseClicked(e -> outputResults.setText(""));
 		expression.setPrefWidth(600);
 		expression.setFont(Font.font("Cambria Math",18));	

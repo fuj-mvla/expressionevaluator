@@ -28,11 +28,26 @@ public class ExpressionEvaluator {
 		str = padString(str);
 		String[] split = str.split("\\s+");
 		split = errorCheck(split);
-	
+		for(int i = 0;i<split.length;i++) {
+			System.out.println(split[i]);
+		}
 		return split;
 	}
 	private String[] errorCheck(String[] in ) {
+		in = errorCheckParen(in);
+		if (in[0].equals(PAREN_ERROR)) {
+			return in;
+		}
+		in = errorCheckData(in);
+		if(in[0].equals(DATA_ERROR)) {
+			return in;
+		}
+		in = errorCheckOp(in);
+		if(in[0].equals(OP_ERROR)) {
+			return in;
+		}
 		
+		return in;
 	}
 	private String[] errorCheckParen(String[] in) {
 		int inc = 0;
@@ -82,6 +97,35 @@ public class ExpressionEvaluator {
 			}
 			prevtok = in[i];
 		}
+		return in;
+	}
+	private String[] errorCheckData(String[]in) {
+		String prevtok = "";
+		String currtok = "";
+		System.out.println("Jack");
+		for (int i = 0;i< in.length;i++) {
+			currtok = in[i];
+			if (identifyTokenType(currtok).equals("Integer") && identifyTokenType(prevtok).equals("Integer")){
+				String[] er = {DATA_ERROR};
+				return er;
+			}
+			else if(identifyTokenType(currtok).equals("Double") && identifyTokenType(prevtok).equals("Double")) {
+				String[] er = {DATA_ERROR};
+				return er;
+			}
+			else if (!identifyTokenType(currtok).equals("Operation")&&!identifyTokenType(currtok).equals("Parenthesis")&&!identifyTokenType(currtok).equals("Right paren")) {
+				try {
+					Double.parseDouble(in[i]);
+					System.out.println(Double.parseDouble(in[i]));
+				}
+				catch(NumberFormatException e) {
+					String[] er = {DATA_ERROR};
+					return er;
+				}
+			}
+			prevtok = in[i];
+		}
+		
 		return in;
 	}
 	private String padString(String in) {
@@ -140,12 +184,10 @@ public class ExpressionEvaluator {
 		double val;
 		while( !isHigherPrecedence(data,operStack.peek())){
 			if (!data.equals(")")) {
-				System.out.println(dataStack.toString());
 				val= performCalc(dataStack.pop(),dataStack.pop(),operStack.pop());
 				dataStack.push(val);
 			}
 			else {
-				System.out.println("here");
 				while(!operStack.peek().equals("(")) {
 					val= performCalc(dataStack.pop(),dataStack.pop(),operStack.pop());
 					dataStack.push(val);
@@ -215,12 +257,12 @@ public class ExpressionEvaluator {
 	            else if(x.matches("^[\\Q)\\E]+$")) {
 	            	x = "Parenthesis";
 	            }
-	            else if(x.matches("^[\\Q+-*/()\\E]+$")) {
+	            else if(x.matches("^[\\Q+-*/\\E]+$")) {
 	                x = "Operation";
 
 	            }
-	            else {
-	                x = "Error";
+	            else if (x.matches("^[\\Q(\\E]+$")){
+	                x = "Right paren";
 	            }
 	        
 	        return x;
