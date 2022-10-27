@@ -27,7 +27,6 @@ public class ExpressionEvaluator {
 	private String[] convertToTokens(String str) {
 		str = padString(str);
 		String[] split = str.split("\\s+");
-	
 		split = errorCheck(split);
 		return split;
 	}
@@ -43,7 +42,8 @@ public class ExpressionEvaluator {
 		in = in.replaceAll("^\\s+(.*)","$1");
 		in = in.replaceAll("^-\\s+(\\d+)", "-$1");
 		in = in.replaceAll("([+-/*])\\s+-\\s+(\\d+)", "$1 -$2");
-		
+		in = in.replaceAll("\\(\\s+-\\s+(\\d+)", "( -$1");
+		in = in.replaceAll("(\\d+)\\s+\\(", "$1 * (");
 		return in;
 	}
 	
@@ -156,7 +156,6 @@ public class ExpressionEvaluator {
 	private String[] errorCheckData(String[]in) {
 		String prevtok = "";
 		String currtok = "";
-		System.out.println("Jack");
 		for (int i = 0;i< in.length;i++) {
 			currtok = in[i];
 			if (identifyTokenType(currtok).equals("Integer") && identifyTokenType(prevtok).equals("Integer")){
@@ -200,7 +199,7 @@ public class ExpressionEvaluator {
         dataStack =  new GenericStack<Double>();
 		operStack =  new GenericStack<String>();
 		String[] data = convertToTokens(str);
-		if (data.length==1) {
+		if (data[0].equals(PAREN_ERROR)|| data[0].equals(OP_ERROR)|| data[0].equals(DATA_ERROR)) {
 			return data[0];
 		}
 		for(int i = 0;i < data.length;i++) {
@@ -222,6 +221,7 @@ public class ExpressionEvaluator {
 			val= performCalc(dataStack.pop(),dataStack.pop(),operStack.pop());
 			dataStack.push(val);
 		}
+		
 		return str + "=" + dataStack.pop() + "";
 	}
 	

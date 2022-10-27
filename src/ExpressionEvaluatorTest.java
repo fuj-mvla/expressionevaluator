@@ -416,6 +416,7 @@ class ExpressionEvaluatorTest {
 		testNum++;
 		evalResults = exprEval.evaluateExpression("-5");
 		results = evalResults.split("=");
+	
 		results[1] = results[1].trim();
 		drslt = Double.parseDouble(results[1]);
 		System.out.println("Test # "+testNum+"\nExpression Results: "+evalResults+"\nResult: "+results[1]+"\n\n");
