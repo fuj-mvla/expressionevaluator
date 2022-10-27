@@ -27,12 +27,42 @@ public class ExpressionEvaluator {
 	private String[] convertToTokens(String str) {
 		str = padString(str);
 		String[] split = str.split("\\s+");
+	
 		split = errorCheck(split);
-		for(int i = 0;i<split.length;i++) {
-			System.out.println(split[i]);
-		}
 		return split;
 	}
+	
+	/**
+	 * Pads the operators with strings
+	 *
+	 * @param in the in
+	 * @return the string
+	 */
+	private String padString(String in) {
+		in = in.replaceAll("([\\+\\-\\/(\\)\\*])"," $1 ");
+		in = in.replaceAll("^\\s+(.*)","$1");
+		in = in.replaceAll("^-\\s+(\\d+)", "-$1");
+		in = in.replaceAll("([+-/*])\\s+-\\s+(\\d+)", "$1 -$2");
+		
+		return in;
+	}
+	
+	/**
+	 * Negative numbers.
+	 *
+	 * @param String array
+	 * @return the string[]
+	 */
+	
+	
+	/**
+	 * General error checking method that checks for data, op and paren error. 
+	 * It checks the errors by calling seperate methods for each error check
+	 * Called by the convert to tokens method
+	 *
+	 * @param in the in
+	 * @return the string[]
+	 */
 	private String[] errorCheck(String[] in ) {
 		in = errorCheckParen(in);
 		if (in[0].equals(PAREN_ERROR)) {
@@ -49,6 +79,17 @@ public class ExpressionEvaluator {
 		
 		return in;
 	}
+	
+	
+	
+	
+	
+	/**
+	 * Parenthesis error check, returns the original array if no error, returns the array with the message if there is error
+	 *
+	 * @param String array
+	 * @return String array with the error message if it has one
+	 */
 	private String[] errorCheckParen(String[] in) {
 		int inc = 0;
 		String currtok = "";
@@ -78,6 +119,12 @@ public class ExpressionEvaluator {
 		return in;
 	}
 	
+	/**
+	 * Error checking for operators. Same as error check paren but for operators.
+	 *
+	 * @param in the in
+	 * @return the string[]
+	 */
 	private String[] errorCheckOp(String[]in) {
 		String prevtok = "";
 		String currtok = "";
@@ -99,6 +146,13 @@ public class ExpressionEvaluator {
 		}
 		return in;
 	}
+	
+	/**
+	 * Error checking for wrong data entered or invalid formats.
+	 *
+	 * @param in the in
+	 * @return the string[]
+	 */
 	private String[] errorCheckData(String[]in) {
 		String prevtok = "";
 		String currtok = "";
@@ -113,26 +167,17 @@ public class ExpressionEvaluator {
 				String[] er = {DATA_ERROR};
 				return er;
 			}
-			else if (!identifyTokenType(currtok).equals("Operation")&&!identifyTokenType(currtok).equals("Parenthesis")&&!identifyTokenType(currtok).equals("Right paren")) {
-				try {
-					Double.parseDouble(in[i]);
-					System.out.println(Double.parseDouble(in[i]));
-				}
-				catch(NumberFormatException e) {
-					String[] er = {DATA_ERROR};
-					return er;
-				}
+			else if (identifyTokenType(in[i]).equals("Error")) {
+				String[] er = {DATA_ERROR};
+				return er;
 			}
 			prevtok = in[i];
 		}
 		
 		return in;
 	}
-	private String padString(String in) {
-		in = in.replaceAll("([\\+\\-\\/(\\)\\*])"," $1 ");
-		in = in.replaceAll("^\\s+(.*)","$1");
-		return in;
-	}
+	
+	
 	
 	/**
 	 * Evaluate expression. This is it, the big Kahuna....
@@ -180,6 +225,13 @@ public class ExpressionEvaluator {
 		return str + "=" + dataStack.pop() + "";
 	}
 	
+	
+	/**
+	 * Evaluate TOS, runs until the precedence of the top of stack for op is less than the current token
+	 * When called, it performs the operations and handles parenthesis until the stack is empty or higherprecdence is no longer true
+	 *
+	 * @param String data
+	 */
 	private void EvaluateTOS(String data) {
 		double val;
 		while( !isHigherPrecedence(data,operStack.peek())){
@@ -202,6 +254,15 @@ public class ExpressionEvaluator {
 		operStack.push(data);
 	}
 	
+	/**
+	 * performs the calculations given the 2 numbers and the operator.
+	 * cheecks to see what operator was passed in, and does the calculations accordingly.
+	 *
+	 * @param double d2
+	 * @param double d1
+	 * @param String op
+	 * @return the result
+	 */
 	private double performCalc(double d2,double d1,String op) {
 		if (op.equals("+")) {
 			return d1+d2;
@@ -218,6 +279,14 @@ public class ExpressionEvaluator {
 		
 	}
 	
+	/**
+	 * Checks the precedence between the operators of d1 and d2. return true if d1 is higher precedence, false if not
+	 * Always returns true if any op is (, false if )
+	 *
+	 * @param String d1
+	 * @param String d2
+	 * @return true, if is higher precedence
+	 */
 	private boolean isHigherPrecedence(String d1, String d2) {
 		int prec = 0;
 		int precd2 = 0;
@@ -247,11 +316,17 @@ public class ExpressionEvaluator {
 		
 	
 	
+	/**
+	 * Identifys the token type for int,double, paren, op, or error.
+	 *
+	 * @param String x
+	 * @return type of token
+	 */
 	private String identifyTokenType(String x) { 
-	            if(x.matches("^[0-9]+$")) {
+	            if(x.matches("^-*[0-9]+$")) {
 	                x = "Integer";
 	            }
-	            else if(x.matches("^[0-9]+[\\.]+[0-9]+$")) {
+	            else if(x.matches("^-*[0-9]+[\\.]+[0-9]+$")) {
 	               x = "Double";
 	            }
 	            else if(x.matches("^[\\Q)\\E]+$")) {
@@ -264,8 +339,11 @@ public class ExpressionEvaluator {
 	            else if (x.matches("^[\\Q(\\E]+$")){
 	                x = "Right paren";
 	            }
-	        
+	            else {
+	            	x = "Error";
+	            }
 	        return x;
+	        
 	}
 }
 
