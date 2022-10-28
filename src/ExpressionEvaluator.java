@@ -44,6 +44,10 @@ public class ExpressionEvaluator {
 		in = in.replaceAll("([+-/*])\\s+-\\s+(\\d+)", "$1 -$2");
 		in = in.replaceAll("\\(\\s+-\\s+(\\d+)", "( -$1");
 		in = in.replaceAll("(\\d+)\\s+\\(", "$1 * (");
+		in = in.replaceAll("\\)\\s+\\(",  ") * (");
+		in = in.replaceAll("\\)\\s+(\\d+)", ") * $1");
+		in = in.replaceAll("-\\s+\\(([\\d-+/*\\s]*)\\)", "( -1 * ( $1 ) )");
+		in = in.replaceAll("^-\\s+", "-1 * ");
 		return in;
 	}
 	
@@ -212,7 +216,7 @@ public class ExpressionEvaluator {
 					operStack.push(token);
 				}
 				else {;
-					EvaluateTOS(token);
+					EvaluateTOS(token,data);
 				}
 			}
 		}
@@ -232,7 +236,7 @@ public class ExpressionEvaluator {
 	 *
 	 * @param String data
 	 */
-	private void EvaluateTOS(String data) {
+	private void EvaluateTOS(String data,String[] x) {
 		double val;
 		while( !isHigherPrecedence(data,operStack.peek())){
 			if (!data.equals(")")) {
