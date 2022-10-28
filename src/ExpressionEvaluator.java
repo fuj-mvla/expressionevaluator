@@ -32,7 +32,7 @@ public class ExpressionEvaluator {
 	}
 	
 	/**
-	 * Pads the operators with strings
+	 * Pads the operators with strings, and checks for imp multipulcation and negative numbers
 	 *
 	 * @param in the in
 	 * @return the string
@@ -217,15 +217,21 @@ public class ExpressionEvaluator {
 				}
 				else {;
 					EvaluateTOS(token,data);
+					if (data[0].equals(DIV0_ERROR)) {
+						return data[0];
+					}
 				}
 			}
 		}
-		double val;
 		while(!operStack.empty()) {
-			val= performCalc(dataStack.pop(),dataStack.pop(),operStack.pop());
-			dataStack.push(val);
+			double d1 = dataStack.pop();
+			double d2 = dataStack.pop();
+			String op = operStack.pop();
+			if (divZeroErr(d1,d2,op)) {
+				return DIV0_ERROR;
+			}
+			dataStack.push(performCalc(d1,d2,op));
 		}
-		
 		return str + "=" + dataStack.pop() + "";
 	}
 	
@@ -237,16 +243,30 @@ public class ExpressionEvaluator {
 	 * @param String data
 	 */
 	private void EvaluateTOS(String data,String[] x) {
-		double val;
+		double d1;
+		double d2;
+		String op;
 		while( !isHigherPrecedence(data,operStack.peek())){
 			if (!data.equals(")")) {
-				val= performCalc(dataStack.pop(),dataStack.pop(),operStack.pop());
-				dataStack.push(val);
+				d1 = dataStack.pop();
+				d2 = dataStack.pop();
+				op = operStack.pop();
+				if (divZeroErr(d1,d2,op)) {
+					x[0] = DIV0_ERROR;
+					return;
+				}
+				dataStack.push(performCalc(d1,d2,op));
 			}
 			else {
 				while(!operStack.peek().equals("(")) {
-					val= performCalc(dataStack.pop(),dataStack.pop(),operStack.pop());
-					dataStack.push(val);
+					d1 = dataStack.pop();
+					d2 = dataStack.pop();
+					op = operStack.pop();
+					if (divZeroErr(d1,d2,op)) {
+						x[0] = DIV0_ERROR;
+						return;
+					}
+					dataStack.push(performCalc(d1,d2,op));
 				}
 				operStack.pop();
 				return;
@@ -258,6 +278,12 @@ public class ExpressionEvaluator {
 		operStack.push(data);
 	}
 	
+	private boolean divZeroErr(double d2,double d1,String op) {
+		if (op.equals("/")&&d2==0) {
+			return true;
+		}
+		return false;
+	}
 	/**
 	 * performs the calculations given the 2 numbers and the operator.
 	 * cheecks to see what operator was passed in, and does the calculations accordingly.
